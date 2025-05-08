@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kikuyu-Kiswahili Translator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-bg: #121212;
+            --secondary-bg: #1e1e1e;
+            --accent-color: #bb86fc;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --error-color: #cf6679;
+            --success-color: #03dac6;
+            --border-radius: 12px;
+            --box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--primary-bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            background-color: var(--secondary-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+            position: relative;
+        }
+
+        header {
+            background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
+            padding: 25px 30px;
+            text-align: center;
+            border-bottom: 1px solid #333;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, var(--accent-color), var(--success-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            display: inline-block;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-bottom: 5px;
+        }
+
+        .translation-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding: 30px;
+        }
+
+        @media (min-width: 768px) {
+            .translation-container {
+                flex-direction: row;
+            }
+        }
+
+        .translation-box {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            transition: var(--transition);
+            border: 1px solid #333;
+        }
+
+        .translation-box:hover {
+            box-shadow: 0 0 15px rgba(187, 134, 252, 0.3);
+        }
+
+        .box-header {
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .language-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .language-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .kikuyu-icon {
+            background-color: #bb86fc;
+            color: #121212;
+        }
+
+        .kiswahili-icon {
+            background-color: #03dac6;
+            color: #121212;
+        }
+
+        .text-area {
+            padding: 20px;
+            min-height: 200px;
+            flex: 1;
+        }
+
+        textarea {
+            width: 100%;
+            height: 100%;
+            min-height: 150px;
+            background-color: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            resize: none;
+            outline: none;
+        }
+
+        .output-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: var(--text-primary);
+            word-wrap: break-word;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .placeholder {
+            color: var(--text-secondary);
+            opacity: 0.7;
+        }
+
+        .buttons-container {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border-radius: 30px;
+            border: none;
+            font-weight: 500;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-translate {
+            background-color: var(--accent-color);
+            color: #121212;
+        }
+
+        .btn-translate:hover {
+            background-color: #a370db;
+            transform: translateY(-2px);
+        }
+
+        .btn-reset {
+            background-color: transparent;
+            color: var(--text-primary);
+            border: 1px solid #444;
+        }
+
+        .btn-reset:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .status {
+            margin-top: 15px;
+            text-align: center;
+            min-height: 24px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .loading {
+            display: inline-block;
+            position: relative;
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+        }
+
+        .loading:after {
+            content: " ";
+            display: block;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 2px solid var(--accent-color);
+            border-color: var(--accent-color) transparent var(--accent-color) transparent;
+            animation: loading 1.2s linear infinite;
+        }
+
+        @keyframes loading {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .error-message {
+            color: var(--error-color);
+        }
+
+        .success-message {
+            color: var(--success-color);
+        }
+
+        /* Animation for translation effect */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .container {
+                width: 95%;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .buttons-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Kikuyu-Kiswahili Translator</h1>
+            <p class="subtitle">Translate Kikuyu language to Kiswahili in real-time</p>
+        </header>
+
+        <div class="translation-container">
+            <div class="translation-box">
+                <div class="box-header">
+                    <div class="language-label">
+                        <div class="language-icon kikuyu-icon">K</div>
+                        <span>Kikuyu</span>
+                    </div>
+                </div>
+                <div class="text-area">
+                    <textarea id="input-text" placeholder="Type Kikuyu text here..."></textarea>
+                </div>
+            </div>
+
+            <div class="translation-box">
+                <div class="box-header">
+                    <div class="language-label">
+                        <div class="language-icon kiswahili-icon">S</div>
+                        <span>Kiswahili</span>
+                    </div>
+                </div>
+                <div class="text-area">
+                    <div id="output-text" class="output-text">
+                        <span class="placeholder">Translation will appear here...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="buttons-container">
+            <button id="translate-btn" class="btn btn-translate">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12.87 15.07L10.33 12.56L10.36 12.53C12.1 10.59 13.34 8.36 14.07 6H17V4H10V2H8V4H1V6H12.17C11.5 7.92 10.44 9.75 9 11.35C8.07 10.32 7.3 9.19 6.69 8H4.69C5.42 9.63 6.42 11.17 7.67 12.56L2.58 17.58L4 19L9 14L12.11 17.11L12.87 15.07ZM18.5 10H16.5L12 22H14L15.12 19H19.87L21 22H23L18.5 10ZM15.88 17L17.5 12.67L19.12 17H15.88Z" fill="currentColor"/>
+                </svg>
+                Translate
+            </button>
+            <button id="reset-btn" class="btn btn-reset">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4C7.58 4 4.01 7.58 4.01 12C4.01 16.42 7.58 20 12 20C15.73 20 18.84 17.45 19.73 14H17.65C16.83 16.33 14.61 18 12 18C8.69 18 6 15.31 6 12C6 8.69 8.69 6 12 6C13.66 6 15.14 6.69 16.22 7.78L13 11H20V4L17.65 6.35Z" fill="currentColor"/>
+                </svg>
+                Reset
+            </button>
+        </div>
+
+        <div id="status" class="status"></div>
+    </div>
+
+    <div class="footer">
+        <p>© 2025 Kikuyu-Kiswahili Translation Project</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputText = document.getElementById('input-text');
+            const outputText = document.getElementById('output-text');
+            const translateBtn = document.getElementById('translate-btn');
+            const resetBtn = document.getElementById('reset-btn');
+            const status = document.getElementById('status');
+
+            // Connect to Google Colab backend
+            // Replace this URL with your actual Google Colab notebook public URL
+            const COLAB_URL = "https://5ab6-35-194-144-109.ngrok-free.app";
+            
+            // Dictionary for common translations (fallback when API is not available)
+            const commonTranslations = {
+                "ngai": "mungu",
+                "mũndũ": "mtu",
+                "maaĩ": "maji",
+                "thĩ": "dunia",
+                "mũthenya": "siku",
+                "ũtheri": "nuru",
+                "nduma": "giza",
+                "riua": "jua",
+                "nyoni": "ndege",
+                "nyamũ": "mnyama",
+                "thamaki": "samaki",
+                "mũtĩ": "mti",
+                "mbegu": "mbegu",
+                "mũgũnda": "shamba",
+                "mũtumia": "mke",
+                "mũthuuriwe": "mume",
+                "mũndũ mũrũme": "mwanamume",
+                "mũndũ wa nja": "mwanamke",
+                "kaana": "mtoto",
+                "kahĩĩ": "mvulana",
+                "kairĩĩtu": "msichana",
+                "mũtwe": "kichwa",
+                "maitho": "macho",
+                "guoko": "mkono",
+                "magũrũ": "miguu",
+                "thakame": "damu",
+                "mũciĩ": "nyumba",
+                "itũũra": "mji",
+                "njĩra": "njia",
+                "mũthamaki": "mfalme",
+                "mũtongoria": "kiongozi"
+            };
+
+            // Function to translate text
+            async function translateText() {
+                const text = inputText.value.trim();
+                
+                if (!text) {
+                    setStatus("Please enter some Kikuyu text to translate", "error");
+                    return;
+                }
+                
+                setStatus('<div class="loading"></div> Translating...', null);
+                
+                try {
+                    // First check if we have the word in our dictionary
+                    const lowerText = text.toLowerCase();
+                    if (commonTranslations[lowerText]) {
+                        displayTranslation(commonTranslations[lowerText]);
+                        setStatus("Translation completed", "success");
+                        return;
+                    }
+                    
+                    // Try to connect to Google Colab for translation
+                    const response = await fetch(`${COLAB_URL}/translate`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ text: text }),
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    
+                    const data = await response.json();
+                    displayTranslation(data.translation);
+                    setStatus("Translation completed", "success");
+                    
+                } catch (error) {
+                    console.error('Error:', error);
+                    
+                    // Fallback: Try to find partial matches in our dictionary
+                    for (const [key, value] of Object.entries(commonTranslations)) {
+                        if (text.includes(key) || key.includes(text)) {
+                            displayTranslation(value + " (partial match)");
+                            setStatus("Used offline dictionary for translation", "success");
+                            return;
+                        }
+                    }
+                    
+                    setStatus("Could not connect to translation service. Please try again later.", "error");
+                }
+            }
+            
+            // Function to display translation with animation
+            function displayTranslation(translation) {
+                outputText.innerHTML = '';
+                outputText.classList.remove('fade-in');
+                
+                // Trigger reflow
+                void outputText.offsetWidth;
+                
+                outputText.textContent = translation;
+                outputText.classList.add('fade-in');
+            }
+            
+            // Function to set status message
+            function setStatus(message, type) {
+                status.innerHTML = message;
+                status.className = 'status';
+                if (type) {
+                    status.classList.add(`${type}-message`);
+                }
+            }
+            
+            // Function to reset the form
+            function resetForm() {
+                inputText.value = '';
+                outputText.innerHTML = '<span class="placeholder">Translation will appear here...</span>';
+                status.innerHTML = '';
+                inputText.focus();
+            }
+            
+            // Event listeners
+            translateBtn.addEventListener('click', translateText);
+            
+            resetBtn.addEventListener('click', resetForm);
+            
+            // Allow translation with Enter key
+            inputText.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    translateText();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
